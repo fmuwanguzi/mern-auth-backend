@@ -5,6 +5,12 @@ const app = express();
 const cors = require('cors');
 const passport = require('passport');
 
+require('./config/passport')(passport);
+
+//API
+const users = require('./api/users');
+
+//PORT
 const PORT = process.env.PORT || 8000;
 
 //Middleware
@@ -16,6 +22,9 @@ app.get('/', (req,res)=>{
     res.status(200).json ({ message: 'Smile you are being watched by the backend enginnering team' })
 });
 
-app.listen(PORT, ()=>{
-    console.log(`Server is listening 😤 on port: ${PORT}`)
+app.use('/api/users', users);
+
+//listen
+app.listen(PORT, () => {
+    console.log(`Backend server is listening 😤 on port: ${PORT}`)
 })
