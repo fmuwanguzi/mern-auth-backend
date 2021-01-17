@@ -5,21 +5,23 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const passport = require('passport');
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Models
 const db = require('../models');
-const User = require('../models/User')
+//const User = require('../models/User')
 
 // GET api/users/test (Public)
 router.get('/test', (req, res) => {
     res.json({ msg: 'User endpoint OK!'});
 });
 
-// POST api/users/register (Public)
+// POST api/users/register (Public) allows the user to sign up
 router.post('/register', (req, res) => {
     console.log('inside of register')
-    console.log(req.body);
-    console.log(db);
+    console.log(db)
+    console.log("-----req---", req.body )
+    //find user by email
     db.User.findOne({ email: req.body.email })
     .then(user => {
         // if email already exits, send a 400 response
@@ -48,45 +50,76 @@ router.post('/register', (req, res) => {
             })
         }
     })
-})
+});
 
-//Post for api/users/login
-router.post('/login', (req, res)=>{
+// POST api/users/login (Public)
+router.post('/login', async (req, res) => {
+    console.log(`/login route for >>> ${req.body}`);
     const email = req.body.email;
     const password = req.body.password;
 
-    //find user email 
+    // Find a user via email
     db.User.findOne({ email })
-    .then(user =>{
-        if (!user){
-            res.status(400).json ({ msg: 'User not found' });
+    .then(user => {
+        // If there is not a user
+        console.log(user);
+        if (!user) {
+            res.status(400).json({ msg: 'User not found'});
         } else {
-            //User is found in the database
+            // A user is found in the database
             bcrypt.compare(password, user.password)
             .then(isMatch => {
-                //check password
-                if(isMatch){
-                    //user match, send JSON web token
-                    //Create a token payload
-                    const payload ={
+                // Check password for a match
+                if (isMatch) {
+                    console.log(isMatch);
+                    // User match, send a JSON Web Token
+                    // Create a token payload
+                    // user.expiredToken = Date.now();
+                    // await user.save();
+                    const payload = {
                         id: user.id,
                         email: user.email,
-                        name: user.name
+                        name: user.name,
+                        // expiredToken: user.expiredToken
                     };
-                    jwt.sign(payload, JWT_SECRET, {expiresIn: '1h'}, (error, token ) =>{
+                    // Sign token
+                    // 3600 is one hour
+                    jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
+                        if (error) {
+                            res.status(400).json({ msg: 'Session has ended, please log in again.'});
+                        }
+                        const verifyOptions = {
+                            expiresIn:  60,
+                        };
+
+                        const  legit = jwt.verify(token, JWT_SECRET, verifyOptions);
+                        console.log(legit);
+                        console.log({
+                            success: true,
+                            token: `Bearer ${token}`,
+                            userData: legit
+                        })
                         res.json({
                             success: true,
-                            token: `Bearer ${token}`
+                            token: `Bearer ${token}`,
+                            userData: legit
                         });
                     });
                 } else {
-                    return res.status(400).json({ msg: "email or password is incorrect "})
+                    return res.status(400).json({ msg: 'Email or Password is incorrect' });
                 }
             })
         }
     })
 })
 
-router.get('/current')
+// GET api/users/current (Private)
+router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
+    res.json({
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email
+    });
+});
 
 module.exports = router;

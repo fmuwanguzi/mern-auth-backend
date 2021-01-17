@@ -1,12 +1,11 @@
 require('dotenv').config();
-const passport = require('passport');
 
 // A passport strategy for authenticating with a JSON web token 
 // This allows us to authenticate end points using a token
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-
 const mongoose = require('mongoose');
+
 const User = require('../models/User');
 
 
@@ -26,12 +25,12 @@ module.exports = (passport) => {
             //done is a callback that has an error first as an argument done(error,user, info)
             if (user){
                 //if a user is found, return null (for error) and the user
-                return done(null, user)
-            
+                return done(null, user);
             } else {
-                return done(null, false)
+                //no user was found
+                return done(null, false);
             }
         })
-        .catch(error => console.log(error))
+        .catch(error => console.log(error));
     }))
 }

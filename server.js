@@ -5,6 +5,7 @@ const app = express();
 const cors = require('cors');
 const passport = require('passport');
 
+//after passport is required the function is ran
 require('./config/passport')(passport);
 
 //API
@@ -13,10 +14,13 @@ const users = require('./api/users');
 //PORT
 const PORT = process.env.PORT || 8000;
 
-//Middleware
+// Middleware
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.json())
+app.use(express.json());
+
+// Passport Middleware
+app.use(passport.initialize());
 
 app.get('/', (req,res)=>{
     res.status(200).json ({ message: 'Smile you are being watched by the backend enginnering team' })
