@@ -122,4 +122,18 @@ router.get('/current', passport.authenticate('jwt', { session: false }), (req, r
     });
 });
 
+
+//this allows user accounts to be deleted
+router.delete('/:id', async (req, res) => {
+    console.log(`/delete route for >>> ${req.body.id}`);
+    console.log("----", req.params.id)
+    const email = req.body.email;
+    const password = req.body.password;
+
+    // Find a user via email
+    db.User.deleteOne({ _id: req.params.id  })
+    .then((user) => res.status(201).json({ user }))
+    .catch((error) => res.send({ error }))
+  })
+
 module.exports = router;
