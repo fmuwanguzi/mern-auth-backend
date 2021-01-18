@@ -4,6 +4,8 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const passport = require('passport');
+//const bodyparser = require('body-parser')
+
 
 //after passport is required the function is ran
 require('./config/passport')(passport);
@@ -16,7 +18,8 @@ const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(cors());
-app.use(express.urlencoded({ extended: false }));
+//app.use(bodyparser.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Passport Middleware

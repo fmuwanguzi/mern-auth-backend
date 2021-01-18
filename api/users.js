@@ -19,7 +19,7 @@ router.get('/test', (req, res) => {
 // POST api/users/register (Public) allows the user to sign up
 router.post('/register', (req, res) => {
     console.log('inside of register')
-    console.log(db)
+    //console.log(db)
     console.log("-----req---", req.body )
     //find user by email
     db.User.findOne({ email: req.body.email })
